@@ -49,9 +49,6 @@ var createTaskEl = function (taskDataObj) {
   // create list item
   var listItemEl = document.createElement("li");
   listItemEl.className = "task-item";
-  // testing 
-  console.log(taskDataObj);
-  console.log(taskDataObj.status);
 
   // add task id as a custom attribute
   listItemEl.setAttribute("data-task-id", taskIdCounter);
@@ -72,6 +69,9 @@ var createTaskEl = function (taskDataObj) {
   // task's object id 
   taskDataObj.id = taskIdCounter;
   tasks.push(taskDataObj);
+
+  // adding saveTasks function 
+  saveTasks();
 
   // increase task counter for the next unique id
   taskIdCounter++;
@@ -129,6 +129,8 @@ var deleteTask = function(taskId) {
     if (tasks[i].id !== parseInt(taskId)) {
       updatedTaskArr.push(tasks[i]);
     }
+    // added the saveTask call 
+    saveTasks();
   }
   // reassign tasks array to be the same as updatedTaskArr
 };
@@ -166,7 +168,8 @@ var completeEditTask = function(taskName, taskType, taskId) {
       tasks[i].type = taskType;
     }
   };
-
+  // added saveTasks call 
+  saveTasks();
 
   alert("Task Updated!");
   formEl.removeAttribute("data-task-id");
@@ -194,7 +197,32 @@ var taskStatusChangeHandler = function(event) {
       tasks[i].status = statusValue;
     }
   }
+  // adding the saveTasks function call 
+  saveTasks();
 };
+// save tasks function
+var saveTasks = function() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+// load tasks function, to load saved tasks
+var loadTasks = function () {
+  var savedTasks = localStorage.getItem("tasks");
+  // if there are no tasks, set tasks to an empty array and return out of the function
+  if (savedTasks === null) {
+    return false;
+  }
+  console.log("Saved Tasks Found!");
+  // parse into array of objects
+  savedTasks = JSON.parse(savedTasks);
+  
+  // loop through savedTasks array
+  for (var i = 0; i < savedTasks.length; i++) {
+    // pass each task object into the `createTaskEl()` function
+    createTaskEl(savedTasks[i]);
+  }
+};
+
+
 formEl.addEventListener("submit", taskFormHandler);
 // other logic...
 var taskButtonHandler = function(event) {
@@ -213,7 +241,10 @@ var taskButtonHandler = function(event) {
     deleteTask(taskId);
   }
 };
+
 pageContentEl.addEventListener("click", taskButtonHandler);
 
 // event listener to delegate in progress and completed tasks
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+// testing 
+loadTasks();
